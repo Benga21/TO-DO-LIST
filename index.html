@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            text-align: center;
+            background-image: url('https://i.pinimg.com/474x/be/3d/c7/be3dc7398dcbbf4f296c92aa9f540575.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: rgb(14, 240, 89);
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: rgba(252, 9, 9, 0.925);
+            margin: 5px 0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 5px;
+            color: rgb(19, 248, 50);
+        }
+        .completed {
+            text-decoration: line-through;
+            color: rgb(223, 44, 13);
+        }
+        button {
+            margin-left: 5px;
+        }
+        h2, input, button {
+            color: rgb(14, 248, 65);
+        }
+    </style>
+</head>
+<body>
+    <h2>To-Do List</h2>
+    <input type="text" id="taskInput" placeholder="Add a new task">
+    <button onclick="addTask()">Add</button>
+    <button id="clearBtn">Clear All</button>
+    <ul id="taskList"></ul>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadTasks();
+            document.getElementById("clearBtn").addEventListener("click", clearAllTasks);
+        });
+
+        function addTask() {
+            let taskInput = document.getElementById("taskInput");
+            let taskText = taskInput.value.trim();
+            if (taskText === "") return;
+
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.push({ text: taskText, completed: false });
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            taskInput.value = "";
+            loadTasks();
+        }
+
+        function loadTasks() {
+            let taskList = document.getElementById("taskList");
+            taskList.innerHTML = "";
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            
+            tasks.forEach((task, index) => {
+                let li = document.createElement("li");
+                li.className = task.completed ? "completed" : "";
+                li.innerHTML = `
+                    <span onclick="toggleTask(${index})">${task.text}</span>
+                    <button onclick="editTask(${index})">✏️</button>
+                    <button onclick="deleteTask(${index})">❌</button>`;
+                taskList.appendChild(li);
+            });
+        }
+
+        function deleteTask(index) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.splice(index, 1);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            loadTasks();
+        }
+
+        function toggleTask(index) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks[index].completed = !tasks[index].completed;
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            loadTasks();
+        }
+
+        function editTask(index) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            let newText = prompt("Edit your task:", tasks[index].text);
+            if (newText !== null && newText.trim() !== "") {
+                tasks[index].text = newText.trim();
+                localStorage.setItem("tasks", JSON.stringify(tasks));
+                loadTasks();
+            }
+        }
+
+        function clearAllTasks() {
+            if (confirm("Are you sure you want to clear all tasks?")) {
+                localStorage.removeItem("tasks");
+                loadTasks();
+            }
+        }
+    </script>
+</body>
+</html>
